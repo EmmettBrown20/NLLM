@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useState,useEffect, useRef } from "react";
 import {
   getConnectedEdges,
   Handle,
@@ -102,95 +102,7 @@ export function ToolButton({
   );
 }
 
-export function NumberVariable({
-  value,
-  nodeID,
-  label,
-  name,
-}: {
-  value: number;
-  nodeID: string;
-  label: string;
-  name: string;
-}) {
-  const { nodes, editNode, edges } = Nodes.use((state) => {
-    return {
-      nodes: state.nodes,
-      editNode: state.editNode,
-      edges: state.edges,
-    };
-  });
 
-  const node = nodes.find((node) => node.id === nodeID);
-
-  const updateNodeInternals = useUpdateNodeInternals();
-
-  const labelRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (labelRef.current && handleRef.current) {
-      // move the location of the handle to be relative to the label
-      handleRef.current.style.position = "abolute";
-      handleRef.current.style.top = `0.6rem`;
-      handleRef.current.style.left = `-1rem`;
-
-      // update the node internals
-      updateNodeInternals(nodeID);
-    }
-  }, [labelRef, handleRef, updateNodeInternals, nodeID]);
-
-  // get connections
-  const edgeConnections = node ? getConnectedEdges([node], edges) : [];
-
-  // check if its connected
-  const isConnected =
-    edgeConnections.find(
-      (edge) => edge.targetHandle === `input-${name}` && edge.target === nodeID
-    ) !== undefined;
-
-  return (
-    <div
-      className="flex flex-row gap-1 justify-between items-center text-sm relative"
-      ref={labelRef}
-    >
-      <Label>
-        <Handle
-          type="target"
-          position={Position.Left}
-          className={`!bg-transparent !border-[2px] !border-white !w-[12px] !h-[12px] !p-[1px] flex items-center justify-center`}
-          ref={handleRef}
-          id={`input-${name}`}
-        >
-          {isConnected && (
-            <div className="w-full h-full rounded-full bg-white" />
-          )}
-        </Handle>
-        {label}
-      </Label>
-      <input
-        type="number"
-        value={value}
-        className={`px-1 py-[1px] rounded w-1/2 nodrag bg-neutral-900/50 focus:outline-none focus:border-indigo-500/50 border-[2px] ${
-          isConnected
-            ? "bg-transparent resize-none border-white/10 border"
-            : "bg-neutral-900/50 border-transparent border-[2px]"
-        }`}
-        disabled={isConnected}
-        onChange={(e) => {
-          if (node) {
-            editNode(nodeID, {
-              input: {
-                ...node.data.input,
-                [name]: Number(e.target.value),
-              },
-            });
-          }
-        }}
-      />
-    </div>
-  );
-}
 
 export function TextVariable({
   value,
@@ -203,85 +115,67 @@ export function TextVariable({
   label: string;
   name: string;
 }) {
-  const { nodes, editNode, edges } = Nodes.use((state) => {
-    return {
-      nodes: state.nodes,
-      editNode: state.editNode,
-      edges: state.edges,
-    };
-  });
+  const { nodes, editNode, edges } = Nodes.use((state) => ({
+    nodes: state.nodes,
+    editNode: state.editNode,
+    edges: state.edges,
+  }));
 
-  const node = nodes.find((node) => node.id === nodeID);
-
+  const node = nodes.find((n) => n.id === nodeID);
   const updateNodeInternals = useUpdateNodeInternals();
-
-  const labelRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
+  const [handlerIds, setHandlerIds] = useState([`${name}-0`]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (labelRef.current && handleRef.current) {
-      // move the location of the handle to be relative to the label
-      handleRef.current.style.position = "abolute";
-      handleRef.current.style.top = `0.6rem`;
-      handleRef.current.style.left = `-1rem`;
-
-      // update the node internals
-      updateNodeInternals(nodeID);
-    }
-  }, [labelRef, handleRef, updateNodeInternals, nodeID]);
 
   useEffect(() => {
     if (textareaRef.current) {
       const styles = window.getComputedStyle(textareaRef.current);
       textareaRef.current.style.height = "auto";
-
-      const newHeight =
-        textareaRef.current.scrollHeight +
-        parseInt(styles.paddingTop) +
-        parseInt(styles.paddingBottom);
-
-      textareaRef.current.style.height = newHeight + "px";
+      const newHeight = textareaRef.current.scrollHeight + parseInt(styles.paddingTop) + parseInt(styles.paddingBottom);
+      textareaRef.current.style.height = `${newHeight}px`;
     }
-  }, [value, textareaRef]);
+  }, [value]);
 
-  // get connections
-  const edgeConnections = node ? getConnectedEdges([node], edges) : [];
+  useEffect(() => {
+    const edgeConnections = node ? getConnectedEdges([node], edges) : [];
+    const lastHandlerId = handlerIds[handlerIds.length - 1];
+    const isConnectedToLastHandler = edgeConnections.some(edge => edge.targetHandle === `input-${lastHandlerId}` && edge.target === nodeID);
 
-  // check if its connected
-  const isConnected =
-    edgeConnections.find(
-      (edge) => edge.targetHandle === `input-${name}` && edge.target === nodeID
-    ) !== undefined;
+    if (isConnectedToLastHandler) {
+      const newHandlerId = `${name}-${handlerIds.length}`;
+      if (!handlerIds.includes(newHandlerId)) {
+        setHandlerIds(prev => [...prev, newHandlerId]);
+      }
+    }
+  }, [edges, node, nodeID, handlerIds, name]);
+
+  useEffect(() => {
+    updateNodeInternals(nodeID);
+  }, [updateNodeInternals, nodeID, handlerIds]);
+
+  // Function to calculate the offset for each handler based on its index
+  const calculateTopOffset = (index) => {
+    const baseOffset = 20; // Base offset for the first handler
+    const increment = 10; // Incremental offset for each subsequent handler
+    return `${baseOffset + (increment * index)}px`;
+  };
 
   return (
-    <div
-      className="flex flex-col gap-1 justify-between text-sm relative"
-      ref={labelRef}
-    >
-      <Label>
+    <div className="flex flex-col gap-1 justify-between text-sm relative">
+      <Label>{label}</Label>
+      {handlerIds.map((handlerId, index) => (
         <Handle
+          key={handlerId}
           type="target"
           position={Position.Left}
-          className={`!bg-transparent !border-[2px] !border-white !w-[12px] !h-[12px] !p-[1px] flex items-center justify-center`}
-          ref={handleRef}
-          id={`input-${name}`}
-        >
-          {isConnected && (
-            <div className="w-full h-full rounded-full bg-white" />
-          )}
-        </Handle>
-        {label}
-      </Label>
+          id={`input-${handlerId}`}
+          className="!bg-transparent !border-[2px] !border-white !w-[12px] !h-[12px] !p-[1px] flex items-center justify-center"
+          style={{ top: calculateTopOffset(index) }} // Apply dynamic top offset based on index
+        />
+      ))}
       <textarea
         ref={textareaRef}
-        className={`px-1 py-[1px] rounded nodrag overflow-y-hidden ${
-          isConnected
-            ? "bg-transparent resize-none border-white/10 border"
-            : "bg-neutral-900/50 border-transparent border-[2px]"
-        } focus:outline-none focus:border-indigo-500/50`}
+        className="px-1 py-[1px] rounded nodrag overflow-y-hidden bg-neutral-900/50 border-transparent border-[2px] focus:outline-none focus:border-indigo-500/50"
         value={value}
-        disabled={isConnected}
         onChange={(e) => {
           if (node) {
             editNode(nodeID, {
@@ -297,73 +191,6 @@ export function TextVariable({
   );
 }
 
-export function ImageVariable({
-  nodeID,
-  label,
-  name,
-}: {
-  nodeID: string;
-  label: string;
-  name: string;
-}) {
-  const { nodes, editNode, edges } = Nodes.use((state) => {
-    return {
-      nodes: state.nodes,
-      editNode: state.editNode,
-      edges: state.edges,
-    };
-  });
-
-  const node = nodes.find((node) => node.id === nodeID);
-
-  const updateNodeInternals = useUpdateNodeInternals();
-
-  const labelRef = useRef<HTMLDivElement>(null);
-  const handleRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (labelRef.current && handleRef.current) {
-      // move the location of the handle to be relative to the label
-      handleRef.current.style.position = "abolute";
-      handleRef.current.style.top = `0.6rem`;
-      handleRef.current.style.left = `-1rem`;
-
-      // update the node internals
-      updateNodeInternals(nodeID);
-    }
-  }, [labelRef, handleRef, updateNodeInternals, nodeID]);
-
-  // get connections
-  const edgeConnections = node ? getConnectedEdges([node], edges) : [];
-
-  // check if its connected
-  const isConnected =
-    edgeConnections.find(
-      (edge) => edge.targetHandle === `input-${name}` && edge.target === nodeID
-    ) !== undefined;
-
-  return (
-    <div
-      className="flex flex-row gap-1 justify-between items-center text-sm relative"
-      ref={labelRef}
-    >
-      <Label>
-        <Handle
-          type="target"
-          position={Position.Left}
-          className={`!bg-transparent !border-[2px] !border-white !w-[12px] !h-[12px] !p-[1px] flex items-center justify-center`}
-          ref={handleRef}
-          id={`input-${name}`}
-        >
-          {isConnected && (
-            <div className="w-full h-full rounded-full bg-white" />
-          )}
-        </Handle>
-        {label}
-      </Label>
-    </div>
-  );
-}
 
 export function Output({
   nodeID,

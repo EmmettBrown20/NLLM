@@ -15,7 +15,6 @@ import "reactflow/dist/style.css";
 import { Nodes } from ".";
 import { Label } from "../Label";
 import {
-  NumberVariable,
   Output,
   Outputs,
   Panel,
@@ -31,9 +30,6 @@ export type Transformer = NodeProps<{
   repeating: boolean;
   input: {
     prompt: string;
-    temperature: number;
-    top_p: number;
-    frequency_penalty: number;
   };
   output: {
     prediction: string;
@@ -47,7 +43,7 @@ export function Transformer(node: Transformer) {
   }));
 
   return (
-    <Panel name="GPT-3" running={node.data.running} selected={node.selected}>
+    <Panel name="Prompt" running={node.data.running} selected={node.selected}>
       <Toolbar show={node.selected}>
         {!node.data.running && (
           <ToolButton
@@ -87,32 +83,13 @@ export function Transformer(node: Transformer) {
         </ToolButton>
       </Toolbar>
 
-      <Variables>
-        <NumberVariable
-          name="temperature"
-          value={node.data.input.temperature || 0.9}
-          label="Temperature"
-          nodeID={node.id}
-        />
-        <NumberVariable
-          name="top_p"
-          value={node.data.input.top_p || 0.9}
-          label="Top P"
-          nodeID={node.id}
-        />
-        <NumberVariable
-          name="frequency_penalty"
-          value={node.data.input.frequency_penalty || 0.0}
-          label="Frequency Penalty"
-          nodeID={node.id}
-        />
+    
         <TextVariable
-          name="prompt"
+          name=""
           value={node.data.input.prompt || ""}
-          label="Prompt"
+          label=""
           nodeID={node.id}
         />
-      </Variables>
 
       <Outputs>
         <Output

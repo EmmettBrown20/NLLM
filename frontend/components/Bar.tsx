@@ -18,30 +18,7 @@ export function Bar({ onCreateNode }: Bar) {
 
   return (
     <div className="absolute left-[15px] top-[4.75rem] bg-neutral-800 rounded flex flex-col overflow-hidden">
-      <Button
-        onClick={() =>
-          onCreateNode({
-            type: "Image",
-            data: {
-              input: {
-                init: "",
-                prompt: "",
-                steps: 30,
-                cfg_scale: 7,
-              },
-              output: {
-                image: "",
-              },
-            },
-            position: flow.project({
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            }),
-          })
-        }
-      >
-        <ImagePlus size={18} strokeWidth={2} />
-      </Button>
+      
       <Button
         onClick={() =>
           onCreateNode({
@@ -49,9 +26,6 @@ export function Bar({ onCreateNode }: Bar) {
             data: {
               input: {
                 prompt: "",
-                temperature: 0,
-                top_p: 0,
-                frequency_penalty: 0,
               },
               output: {
                 prediction: "",
@@ -66,113 +40,7 @@ export function Bar({ onCreateNode }: Bar) {
       >
         <FileType2 size={18} strokeWidth={2} />
       </Button>
-      <Button
-        onClick={() =>
-          onCreateNode({
-            type: "RandomNumber",
-            data: {
-              input: {
-                min: 0,
-                max: 1,
-              },
-              output: {
-                number: 0.5,
-              },
-            },
-            position: flow.project({
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            }),
-          })
-        }
-      >
-        <Dice2 size={18} strokeWidth={2} />
-      </Button>
-      <Button
-        onClick={() =>
-          onCreateNode({
-            type: "Concat",
-            data: {
-              input: {
-                first: "",
-                second: "",
-              },
-              output: {
-                final: "",
-              },
-            },
-            position: flow.project({
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            }),
-          })
-        }
-      >
-        <TextCursorInput size={18} strokeWidth={2} />
-      </Button>
-      <Button
-        onClick={() =>
-          onCreateNode({
-            type: "RegexReplace",
-            data: {
-              input: {
-                expression: "",
-                replacement: "",
-                text: "",
-              },
-              output: {
-                final: "",
-              },
-            },
-            position: flow.project({
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            }),
-          })
-        }
-      >
-        <Regex size={18} strokeWidth={2} />
-      </Button>
-      <Button
-        onClick={() =>
-          onCreateNode({
-            type: "LoadImage",
-            data: {
-              input: {},
-              output: {
-                image: "",
-              },
-            },
-            position: flow.project({
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            }),
-          })
-        }
-      >
-        <File size={18} strokeWidth={2} />
-      </Button>
-      <Button
-        onClick={() =>
-          onCreateNode({
-            type: "Interrogate",
-            data: {
-              input: {
-                image: "",
-              },
-              output: {
-                prompt: "",
-              },
-            },
-            position: flow.project({
-              x: window.innerWidth / 2,
-              y: window.innerHeight / 2,
-            }),
-          })
-        }
-      >
-        <View size={18} strokeWidth={2} />
-      </Button>
+    
     </div>
   );
 }

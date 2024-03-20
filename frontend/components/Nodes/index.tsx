@@ -1,10 +1,4 @@
-import { Image } from "./Image";
 import { Transformer } from "./Transformer";
-import { RandomNumber } from "./RandomNumber";
-import { Concat } from "./Concat";
-import { RegexReplace } from "./RegexReplace";
-import { LoadImage } from "./LoadImage";
-import { Interrogate } from "./Interrogate";
 import create from "zustand";
 import {
   Connection,
@@ -36,33 +30,16 @@ export type NodesState = {
 
 export declare namespace Nodes {
   export {
-    Image,
-    Transformer,
-    RandomNumber,
-    Concat,
-    RegexReplace,
-    LoadImage,
-    Interrogate,
+    Transformer
   };
 }
 
 export namespace Nodes {
-  Nodes.Image = Image;
-  Nodes.Transformer = Transformer;
-  Nodes.RandomNumber = RandomNumber;
-  Nodes.Concat = Concat;
-  Nodes.RegexReplace = RegexReplace;
-  Nodes.LoadImage = LoadImage;
-  Nodes.Interrogate = Interrogate;
+  Nodes.Transformer = Transformer
+
 
   export const nodeTypes = {
-    Image: Nodes.Image.Memo,
-    Transformer: Nodes.Transformer.Memo,
-    RandomNumber: Nodes.RandomNumber.Memo,
-    Concat: Nodes.Concat.Memo,
-    RegexReplace: Nodes.RegexReplace.Memo,
-    LoadImage: Nodes.LoadImage.Memo,
-    Interrogate: Nodes.Interrogate.Memo,
+    Transformer: Nodes.Transformer.Memo
   };
 
   export const use = create<NodesState>((set, get) => ({
@@ -129,20 +106,8 @@ export namespace Nodes {
 
   export async function runNode(node: Node): Promise<any> {
     switch (node.type) {
-      case "Image":
-        return Nodes.Image.run(node);
       case "Transformer":
         return Nodes.Transformer.run(node);
-      case "RandomNumber":
-        return Nodes.RandomNumber.run(node);
-      case "Concat":
-        return Nodes.Concat.run(node);
-      case "RegexReplace":
-        return Nodes.RegexReplace.run(node);
-      case "LoadImage":
-        return Nodes.LoadImage.run(node);
-      case "Interrogate":
-        return Nodes.Interrogate.run(node);
       default:
         throw new Error(`Node type ${node.type} not found`);
     }
